@@ -1,0 +1,253 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define LANES 3
+#define MAX_TURNS 50
+/* Display the road */
+void displayRoad(int playerLane, int enemyLane, int coinLane)
+{
+    printf("\n");
+    printf("========================================\n");
+    printf("              HIGHWAY RUSH              \n");
+    printf("========================================\n");
+    printf("\n");
+    printf("        LANE 1    LANE 2    LANE 3\n");
+    printf("       +---------+---------+---------+\n");
+    printf("       |         |         |         |\n");
+    printf("       |");
+    if (enemyLane == 0)
+        printf("    X    ");
+    else
+        printf("         ");
+    printf("|");
+    if (enemyLane == 1)
+        printf("    X    ");
+    else
+        printf("         ");
+    printf("|");
+    if (enemyLane == 2)
+        printf("    X    ");
+    else
+        printf("         ");
+    printf("|\n");
+    printf("       |         |         |         |\n");
+    printf("       |");
+    if (coinLane == 0)
+        printf("    $    ");
+    else
+        printf("         ");
+    printf("|");
+    if (coinLane == 1)
+        printf("    $    ");
+    else
+        printf("         ");
+    printf("|");
+    if (coinLane == 2)
+        printf("    $    ");
+    else
+        printf("         ");
+    printf("|\n");
+    printf("       |         |         |         |\n");
+    printf("       |");
+    if (playerLane == 0)
+        printf("    A    ");
+    else
+        printf("         ");
+    printf("|");
+    if (playerLane == 1)
+        printf("    A    ");
+    else
+        printf("         ");
+    printf("|");
+    if (playerLane == 2)
+        printf("    A    ");
+    else
+        printf("         ");
+    printf("|\n");
+    printf("       +---------+---------+---------+\n");
+    printf("\n");
+    printf("A = Your Car\n");
+    printf("X = Enemy Car\n");
+    printf("$ = Coin\n");
+}
+/* Get a valid lane choice from the player */
+int getPlayerChoice(void)
+{
+    int choice;
+    while (1)
+    {
+        printf("\nChoose your lane:\n");
+        printf("1 = Left Lane\n");
+        printf("2 = Middle Lane\n");
+        printf("3 = Right Lane\n");
+        printf("Enter your choice: ");
+        if (scanf("%d", &choice) != 1)
+        {
+            printf("\nInvalid input! Please enter 1, 2, or 3.\n");
+            while (getchar() != '\n')
+            {
+                /* Clear invalid input */
+            }
+            continue;
+        }
+        if (choice >= 1 && choice <= 3)
+        {
+            return choice - 1;
+        }
+        printf("\nPlease enter only 1, 2, or 3.\n");
+    }
+}
+/* Start a new game */
+void startGame(int *score, int *lives, int *level)
+{
+    *score = 0;
+    *lives = 3;
+    *level = 1;
+}
+int main(void)
+{
+    int playerLane;
+    int enemyLane;
+    int coinLane;
+    int score;
+    int bestScore = 0;
+    int lives;
+    int level;
+    int turn;
+    int choice;
+    int playAgain = 1;
+    srand((unsigned int)time(NULL));
+    printf("\n");
+    printf("========================================\n");
+    printf("          HIGHWAY RUSH GAME             \n");
+    printf("        C CAR RACING PROJECT            \n");
+    printf("========================================\n");
+    printf("\nGame Rules:\n");
+    printf("1. Control your car using numbers 1, 2 and 3.\n");
+    printf("2. Avoid the enemy car (X).\n");
+    printf("3. Collect coins ($) for bonus points.\n");
+    printf("4. You have 3 lives.\n");
+    printf("5. The level increases as your score increases.\n");
+    while (playAgain == 1)
+    {
+        /* Initialize game */
+        startGame(&score, &lives, &level);
+        playerLane = 1;
+        printf("\n========================================\n");
+        printf("             RACE STARTED!              \n");
+        printf("========================================\n");
+        for (turn = 1; turn <= MAX_TURNS && lives > 0; turn++)
+        {
+            /*
+             * Level increases every 100 points.
+             */
+            level = (score / 100) + 1;
+            /*
+             * Generate random enemy and coin positions.
+             */
+            enemyLane = rand() % LANES;
+            coinLane = rand() % LANES;
+            printf("\n----------------------------------------\n");
+            printf("Turn   : %d\n", turn);
+            printf("Level  : %d\n", level);
+            printf("Score  : %d\n", score);
+            printf("Lives  : %d\n", lives);
+            printf("----------------------------------------\n");
+            displayRoad(playerLane, enemyLane, coinLane);
+            /*
+             * Get player's lane choice.
+             */
+            choice = getPlayerChoice();
+            playerLane = choice;
+            /*
+             * Check collision with enemy car.
+             */
+            if (playerLane == enemyLane)
+            {
+                lives--;
+                printf("\n");
+                printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+                printf("             CRASH!                     \n");
+                printf("You hit an enemy car!\n");
+                printf("Lives remaining: %d\n", lives);
+                printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+            }
+            else
+            {
+                /*
+                 * Successful movement.
+                 */
+                score += 10;
+                printf("\n");
+                printf("Good driving! +10 points.\n");
+                /*
+                 * Check whether the player collected a coin.
+                 */
+                if (playerLane == coinLane)
+                {
+                    score += 25;
+                    printf("COIN COLLECTED! +25 bonus points.\n");
+                }
+            }
+            /*
+             * Update best score.
+             */
+            if (score > bestScore)
+            {
+                bestScore = score;
+            }
+            /*
+             * Show level-up message.
+             */
+            if (score > 0 && score % 100 < 10)
+            {
+                printf("\n");
+                printf("******** LEVEL UP! ********\n");
+                printf("You reached Level %d!\n", level);
+                printf("****************************\n");
+            }
+        }
+        /*
+         * Game over screen.
+         */
+        printf("\n");
+        printf("========================================\n");
+        printf("               GAME OVER                \n");
+        printf("========================================\n");
+        printf("Final Score : %d\n", score);
+        printf("Best Score  : %d\n", bestScore);
+        printf("Level       : %d\n", level);
+        printf("========================================\n");
+        /*
+         * Ask whether the player wants another game.
+         */
+        while (1)
+        {
+            printf("\nDo you want to play again?\n");
+            printf("1 = Yes\n");
+            printf("0 = No\n");
+            printf("Enter choice: ");
+            if (scanf("%d", &choice) == 1 &&
+                (choice == 0 || choice == 1))
+            {
+                break;
+            }
+            printf("Please enter 1 or 0.\n");
+            while (getchar() != '\n')
+            {
+                /* Clear invalid input */
+            }
+        }
+        if (choice == 0)
+        {
+            playAgain = 0;
+        }
+    }
+    printf("\n");
+    printf("========================================\n");
+    printf("        THANK YOU FOR PLAYING!          \n");
+    printf("========================================\n");
+    printf("Your best score: %d\n", bestScore);
+    printf("========================================\n");
+    return 0;
+}
